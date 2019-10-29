@@ -80,6 +80,7 @@ pre <- as_tibble(seq(from = 5500, to = 8000, by = 250)) %>%
   mutate(bank = 0)
 for (i in seq(1:length(pre$value))){
   bankruptcy(pre$value[i], 0.1)
+  pre$bank[i] <- p_bank
 }
 pos_index <- as.numeric(match(max(pre$value[pre$bank > 0.02]), pre$value))
 neg_index <- as.numeric(match(min(pre$value[pre$bank < 0.02]), pre$value))
