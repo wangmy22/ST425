@@ -10,3 +10,7 @@
 - version 1.03
 1. debugging of 'newton' part
 2. extension of 'newton' part
+
+- version 1.04
+1. employ ggplot_ly function to make the plot interactive
+2. simulate the asset of the company in the future 10 years (still needs to be improved to get the expected value) 
