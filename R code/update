@@ -6,3 +6,7 @@
 1. delect set.seed() function in each part
 2. using set.seed() function in bankruptcy function
 3. finishing 'Newton-Rapshon' part
+
+- version 1.03
+1. debugging of 'newton' part
+2. extension of 'newton' part
