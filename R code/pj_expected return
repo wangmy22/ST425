@@ -1,0 +1,50 @@
+df <- data.frame()
+expect_asset_10y <- function(starting_asset,premium_peryear,prob_claim){
+for (i in 1:1000){
+  initial <- 250000
+  pre <- 6000
+  for (j in 1:10){
+    n <- sum(rbinom(1,1000,0.1))
+    compen <- r_pareto(n,3,100000)
+    asset <- initial+1000*pre-sum(compen)
+    df[i,j] <- asset
+    initial <- asset
+  }
+}}
+
+
+names <- vector()
+for (i in 1:10){
+  a <- paste("asset at the end of year",i)
+  names[i] <- a
+}
+colnames(df) <- names
+
+
+### design a function which simulates the return in the following 10 years for 1000 times
+expect_asset_10y <- function(starting_asset,premium_peryear,prob_claim){
+  for (i in 1:1000){
+    initial <- starting_asset
+    pre <- premium_peryear
+    prob <- prob_claim
+    for (j in 1:10){
+      n <- sum(rbinom(1,1000,prob))
+      compen <- r_pareto(n,3,100000)
+      asset <- initial+1000*pre-sum(compen)
+      df[i,j] <- asset
+      initial <- asset
+    }
+  }
+  df}
+result <- expect_asset_10y(250000,6000,0.1)
+
+names <- vector()
+for (i in 1:10){
+  a <- paste("asset at the end of year",i)
+  names[i] <- a
+}
+colnames(result) <- names
+
+
+### visualisation of the expected mean over the following 10 years
+colMeans(result)
