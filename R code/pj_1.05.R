@@ -19,6 +19,7 @@ bankruptcy <- function(pre, claim){
     balance[i] <- 250000 + 1000 * pre - sum(pension)
   }
   summary(balance)
+  assets <<- mean(balance)
   p_bank <<- mean(balance < 0)
 }
 ## Q1, c
@@ -37,6 +38,7 @@ p
 
 ## Q2
 bankruptcy(6000, 0.1)
+cat(paste('the expected assets at year end is', assets))
 cat(paste('the probability of bankruptcy is', p_bank))
 
 ## Q3,a
@@ -81,7 +83,61 @@ plot_ly(x = colnames(data_3d), y = rownames(data_3d), z = data_3d, type = 'surfa
 
 ## Extension - VaR and Expected Shortfall estimation
 
-## Extension - year by year bankruptcy rate and profit rate
+## Extension - year by year survival rate and profit rate
+# Calculate the year by year survival rate 
+df <- data.frame()
+# design a function which simulates the return in the following 10 years for 1000 times
+expect_asset_10y <- function(starting_asset,premium_peryear,prob_claim){
+  for (i in 1:1000){
+    initial <- starting_asset
+    pre <- premium_peryear
+    prob <- prob_claim
+    for (j in 1:10){
+      n <- sum(rbinom(1,1000,prob))
+      compen <- r_pareto(n,3,100000)
+      asset <- initial+1000*pre-sum(compen)
+      df[i,j] <- asset
+      initial <- asset
+    }
+  }
+  df}
+result <- expect_asset_10y(250000,6000,0.1)
+
+names <- vector()
+for (i in 1:10){
+  a <- paste("asset at the end of year",i)
+  names[i] <- a
+}
+colnames(result) <- names
+
+survival <- vector()
+for (i in seq(1:10)){
+  if (i == 1){survival[i] <- mean(result[,i]>0)
+  } else {survival[i] <- mean(result[,i]>0)*survival[i-1]
+  }
+}
+
+plot(seq(1:10),survival,xlab = 'year', ylab = 'survival rate')
+
+# Calculate the year by year profit rate
+fprofit <- function(pre, claim){
+  profit_rate <- vector()
+  for (i in seq(1:1000)){
+    n <- sum(rbinom(1,1000, claim))
+    pension <- r_pareto(n, 3, 100000)
+    profit_rate[i] <- (1000 * pre - sum(pension))/(1000*pre)
+  }
+  pr <<- mean(profit_rate) 
+}
+
+profit<-vector()
+set.seed(425)
+for (i in seq(1:10)){
+  fprofit(6000,0.1)
+  profit[i] <- pr
+}
+
+plot(seq(1:10),profit,xlab = 'year',ylab='profit rate')
 
 ## Newton-Raphson method to solve bankruptcy rate = 0.2
 # premium
