@@ -21,6 +21,7 @@ bankruptcy <- function(pre, claim){
   summary(balance)
   assets <<- mean(balance)
   p_bank <<- mean(balance < 0)
+  list(balance=balance)
 }
 ## Q1, c
 set.seed(425)
@@ -82,6 +83,31 @@ data_3d <- data_3d[,-1]
 plot_ly(x = colnames(data_3d), y = rownames(data_3d), z = data_3d, type = 'surface')
 
 ## Extension - VaR and Expected Shortfall estimation
+prob<-seq(0.05,0.15,by=0.005)
+premium<-seq(5500,8000,by=250)
+VaR_95<-matrix(0,nrow=length(prob),ncol=length(premium),dimnames = list(prob,premium))
+ES<-matrix(0,nrow=length(prob),ncol=length(premium),dimnames = list(prob,premium))
+
+for(i in 1:length(prob))
+{
+  for(j in 1:length(premium))
+  {
+    t.tmp<-bankruptcy(premium[j],prob[i])
+    VaR_95[i,j]=quantile(t.tmp$balance,0.05)
+  }
+}
+
+plot_ly(x=prob,y=premium,z=VaR_95,type="surface")
+
+for(i in 1:length(prob))
+{
+  for(j in 1:length(premium))
+  {
+    t.tmp<-fall(premium[j],prob[i])
+    ES[i,j]=mean(t.tmp$balance[t.tmp$balance<VaR_95[i,j]])
+  }
+}
+plot_ly(x=prob,y=premium,z=ES,type="surface")
 
 ## Extension - year by year survival rate and profit rate
 # Calculate the year by year survival rate 
