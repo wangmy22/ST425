@@ -96,6 +96,10 @@ expect_asset_10y <- function(starting_asset,premium_peryear,prob_claim){
       n <- sum(rbinom(1,1000,prob))
       compen <- r_pareto(n,3,100000)
       asset <- initial+1000*pre-sum(compen)
+      if(asset<0){
+        df[i,j:10] <- NA
+        break
+      }else
       df[i,j] <- asset
       initial <- asset
     }
@@ -103,6 +107,7 @@ expect_asset_10y <- function(starting_asset,premium_peryear,prob_claim){
   df}
 result <- expect_asset_10y(250000,6000,0.1)
 
+## add column names
 names <- vector()
 for (i in 1:10){
   a <- paste("asset at the end of year",i)
@@ -110,14 +115,22 @@ for (i in 1:10){
 }
 colnames(result) <- names
 
-survival <- vector()
-for (i in seq(1:10)){
-  if (i == 1){survival[i] <- mean(result[,i]>0)
-  } else {survival[i] <- mean(result[,i]>0)*survival[i-1]
-  }
+### probability of survival in the following 10 years
+survival_prob <- vector()
+for (i in 1:10){
+  survival_prob[i] <- result %>% 
+    filter(!is.na(result[,i])==TRUE) %>% 
+    nrow()/1000
 }
+survival_prob
+df_survival_prob <- data.frame(year=seq(1:10),survival_prob=survival_prob)
+df_survival_prob %>% 
+  ggplot(aes(x=year,y=survival_prob))+
+  geom_line()+
+  geom_point()+
+  coord_cartesian(xlim = c(1, 10))
 
-plot(seq(1:10),survival,xlab = 'year', ylab = 'survival rate')
+
 
 # Calculate the year by year profit rate
 fprofit <- function(pre, claim){
