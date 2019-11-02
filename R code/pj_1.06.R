@@ -103,7 +103,7 @@ for(i in 1:length(prob))
 {
   for(j in 1:length(premium))
   {
-    t.tmp<-fall(premium[j],prob[i])
+    t.tmp<-bankruptcy(premium[j],prob[i])
     ES[i,j]=mean(t.tmp$balance[t.tmp$balance<VaR_95[i,j]])
   }
 }
