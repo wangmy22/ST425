@@ -150,12 +150,13 @@ for (i in 1:10){
 }
 survival_prob
 df_survival_prob <- data.frame(year=seq(1:10),survival_prob=survival_prob)
-df_survival_prob %>% 
+survival_prob_p <- df_survival_prob %>% 
   ggplot(aes(x=year,y=survival_prob))+
   geom_line()+
   geom_point()+
   coord_cartesian(xlim = c(1, 10))
-
+survival_prob_p <- ggplotly(survival_prob_p)
+survival_prob_p
 
 
 # Calculate the year by year profit rate
