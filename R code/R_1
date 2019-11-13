@@ -1,0 +1,26 @@
+
+# install the package
+library(readxl)
+library(tidyverse)
+
+# import the dataset
+MCM_NFLIS_Data <- read_excel("D:/MCM/2018_MCMProblemC_DATA/MCM_NFLIS_Data.xlsx", 
+                             sheet = "Data")
+
+feature_2016 <- read.csv("D:/MCM/2018_MCMProblemC_DATA/ACS_16_5YR_DP02_with_ann.csv",header = T)
+
+# data cleaning
+Drug <- MCM_NFLIS_Data
+# select the subset which only contains the data for 2016
+drug_2016 <- Drug %>% 
+  filter(YYYY=="2016")
+
+# select the rows with unique county name
+sub_unique_county <- drug_2016 %>% distinct(COUNTY,.keep_all = T)
+  
+  
+  
+  
+## remove all the columns whose column names contain the string "Margin of error"
+feature_2016 <- feature_2016 %>% 
+  select(-contains("Margin"))
