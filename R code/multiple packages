@@ -1,0 +1,35 @@
+r_pareto <- function(n, a, b){
+  U <- runif(n)
+  x <- b * ((1 - U)^(-1/a) - 1)
+  x
+}
+
+
+b2 <- vector()
+try <- seq(6000,12000,500)
+for (k in 1:length(try)){
+  list <- new_expect_asset_2y(a=try[k], discount_rate = 1)
+  b2[k] <- sum(is.na(list[,2])==F)
+}
+b2
+
+
+new_expect_asset_2y <- function(a,starting_asset=250000,discount_rate,prob_claim=0.1,year=2){
+  set.seed(425)
+  plan <- c(1000*a,(12000-discount_rate*a)*1000)
+  for (i in 1:1000){
+    initial <- starting_asset
+    prob <- prob_claim
+    for (j in 1:year){
+      n <- sum(rbinom(1,1000,prob))
+      compen <- r_pareto(n,3,100000)
+      asset <- initial+plan[j]-sum(compen)
+      if(asset<0){
+        df[i,j:year] <- NA
+        break
+      }else
+        df[i,j] <- asset
+      initial <- asset
+    }
+  }
+  df}
