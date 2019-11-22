@@ -260,7 +260,7 @@ for (i in length(data_new$pre)){
 }
 ggplot(data_new, aes(pre, claim, color = 'bankruptcy = 0.02')) +
   geom_line() +
-  theme_classic() +
+  theme_bw() +
   theme(legend.title = element_blank())
 
 
