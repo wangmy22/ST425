@@ -23,6 +23,19 @@ bankruptcy <- function(pre, claim){
   p_bank <<- mean(balance < 0)
   list(balance=balance)
 }
+
+bankruptcy2 <- function(pre, claim){
+  set.seed(425)
+  balance <- vector()
+  for (i in seq(1:100000)){
+    n <- sum(rbinom(1,1000, claim))
+    pension <- r_pareto(n, 3, 100000)
+    balance[i] <- 250000 + 1000 * pre - sum(pension)
+  }
+  summary(balance)
+  assets <<- mean(balance)
+  p_bank <<- mean(balance < 0)
+}
 ## Q1, c
 set.seed(425)
 x <- r_pareto(10000, 3, 100000)
@@ -184,7 +197,7 @@ plot(seq(1:10),profit,xlab = 'year',ylab='profit rate')
 pre <- as_tibble(seq(from = 5500, to = 8000, by = 250)) %>%
   mutate(bank = 0)
 for (i in seq(1:length(pre$value))){
-  bankruptcy(pre$value[i], 0.1)
+  pre$bank[i] <- bankruptcy2(pre$value[i], 0.1)
 }
 pos_index <- as.numeric(match(max(pre$value[pre$bank > 0.02]), pre$value))
 neg_index <- as.numeric(match(min(pre$value[pre$bank < 0.02]), pre$value))
@@ -195,7 +208,7 @@ neg_bank <- as.numeric(pre[neg_index, 2])
 dist = 1
 while (dist > 10^-5){
   value_hat <- pos_value - (pos_bank - 0.02) * (pos_value - neg_value)/(pos_bank - neg_bank)
-  bank_hat <- bankruptcy(value_hat, 0.1)
+  bank_hat <- bankruptcy2(value_hat, 0.1)
   dist <- abs(bank_hat - 0.02)
   if (bank_hat < 0.02){
     neg_bank <- bank_hat
@@ -205,13 +218,12 @@ while (dist > 10^-5){
     pos_value <- value_hat
   }
 }
-value_hat
-bankruptcy(value_hat, 0.1)
+pre_1 <-value_hat
 # similarly for claim
 claim <- as_tibble(seq(from = 0.05, to = 0.15, by = 0.005)) %>%
   mutate(bank = 0)
 for (i in seq(1:length(claim$value))){
-  bankruptcy(6000, claim$value[i])
+  bankruptcy2(6000, claim$value[i])
   claim$bank[i] <- p_bank}
 pos_index <- as.numeric(match(min(claim$value[claim$bank > 0.02]), claim$value))
 neg_index <- as.numeric(match(max(claim$value[claim$bank < 0.02]), claim$value))
@@ -222,7 +234,7 @@ neg_bank <- as.numeric(claim[neg_index, 2])
 dist = 1
 while (dist > 10^-5){
   value_hat <<- pos_value - (pos_bank - 0.02) * (pos_value - neg_value)/(pos_bank - neg_bank)
-  bank_hat <- bankruptcy(6000, value_hat)
+  bank_hat <- bankruptcy2(6000, value_hat)
   dist <- abs(bank_hat - 0.02)
   if (bank_hat < 0.02){
     neg_bank <- bank_hat
@@ -232,7 +244,24 @@ while (dist > 10^-5){
     pos_value <- value_hat
   }
 }
-value_hat
+claim_2 <- value_hat
+
+data <- list(pre = c(pre_1, 6000), claim = c(0.1, claim_2))
+data %>% as_tibble()
+ols <- lm(claim ~ pre, data = data)
+data_new <- list(pre = seq(from = 5000, to = 8000, by = 250))
+data_new$claim <- predict(ols, data_new)
+data_new = data_new%>% 
+  as_tibble() %>%
+  mutate(dist = NA)
+for (i in length(data_new$pre)){
+  est <- bankruptcy2(data_new$pre[i], data_new$claim[i])
+  data_new$dist = abs(est - 0.02)
+}
+ggplot(data_new, aes(pre, claim, color = 'bankruptcy = 0.02')) +
+  geom_line() +
+  theme_classic() +
+  theme(legend.title = element_blank())
 
 
 # the code after this one serves the same function
